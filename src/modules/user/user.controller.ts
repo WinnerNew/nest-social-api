@@ -1,7 +1,14 @@
-import { Controller, Get, UseGuards, Request, Param } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Request,
+  Param,
+  Query,
+} from "@nestjs/common";
 import { UserService } from "./user.service";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
-import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 
 @ApiTags("user")
 @Controller("api/user")
@@ -9,8 +16,13 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Get()
-  async getUsers() {
-    return this.userService.getUsers();
+  @ApiQuery({ name: "page", required: false, type: Number, example: 1 })
+  @ApiQuery({ name: "limit", required: false, type: Number, example: 10 })
+  async getUsers(@Query("page") page?: string, @Query("limit") limit?: string) {
+    return this.userService.getUsers(
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 10
+    );
   }
 
   @ApiBearerAuth()

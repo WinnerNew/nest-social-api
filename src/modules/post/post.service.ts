@@ -6,18 +6,51 @@ import { CreatePostDto } from "./dto/create-post.dto";
 export class PostService {
   constructor(private prisma: PrismaService) {}
 
-  async getPosts() {
-    const posts = await this.prisma.post.findMany({
-      include: {
-        user: true,
-        likes: true,
-        reposts: true,
-        replies: true,
-      },
-    });
+  async getPosts(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const [posts, total] = await Promise.all([
+      this.prisma.post.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              handle: true,
+              avatar: true,
+            },
+          },
+          _count: {
+            select: {
+              likes: true,
+              reposts: true,
+              replies: true,
+            },
+          },
+        },
+      }),
+      this.prisma.post.count(),
+    ]);
+
     return {
       success: true,
-      data: { posts },
+      data: {
+        posts: posts.map((post) => ({
+          ...post,
+          likesCount: post._count.likes,
+          repostsCount: post._count.reposts,
+          repliesCount: post._count.replies,
+          _count: undefined,
+        })),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
     };
   }
 
@@ -26,7 +59,14 @@ export class PostService {
     const post = await this.prisma.post.create({
       data: { content, image, userId },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            handle: true,
+            avatar: true,
+          },
+        },
       },
     });
     return {

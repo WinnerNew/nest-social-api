@@ -5,18 +5,37 @@ import { PrismaService } from "../../common/utils/prisma.service";
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async getUsers() {
-    const users = await this.prisma.user.findMany();
+  private sanitizeUser(user: any) {
+    return {
+      id: user.id,
+      username: user.username,
+      handle: user.handle,
+      avatar: user.avatar,
+      createdAt: user.createdAt,
+    };
+  }
+
+  async getUsers(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+      }),
+      this.prisma.user.count(),
+    ]);
+
     return {
       success: true,
       data: {
-        users: users.map((user) => ({
-          id: user.id,
-          username: user.username,
-          handle: user.handle,
-          avatar: user.avatar,
-          createdAt: user.createdAt,
-        })),
+        users: users.map((user) => this.sanitizeUser(user)),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       },
     };
   }
@@ -29,13 +48,7 @@ export class UserService {
     return {
       success: true,
       data: {
-        user: {
-          id: user.id,
-          username: user.username,
-          handle: user.handle,
-          avatar: user.avatar,
-          createdAt: user.createdAt,
-        },
+        user: this.sanitizeUser(user),
       },
     };
   }
