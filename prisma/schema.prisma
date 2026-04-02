@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String    @id @default(cuid())
+  username   String    @unique
+  handle     String    @unique
+  avatar     String    @db.LongText
+  bio        String?   @db.Text
+  location   String?
+  website    String?
+  password   String
+  followers  Int       @default(0)
+  following  Int       @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  chats1     Chat[]    @relation("User1Chats")
+  chats2     Chat[]    @relation("User2Chats")
+  messages   Message[]
+  posts      Post[]
+  likedPosts Like[]
+  reposts    Repost[]
+
+  // 关注逻辑
+  followersList Follow[] @relation("follower")
+  followingList Follow[] @relation("following")
+
+  // 通知关联
+  notifications          Notification[] @relation("recipient")
+  triggeredNotifications Notification[] @relation("actor")
+
+  @@map("users")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  type        String // "LIKE", "REPOST", "REPLY", "FOLLOW", "MESSAGE"
+  postId      String? // 相关的帖子ID
+  messageId   String? // 相关的消息ID
+  actorId     String // 触发动作的用户ID
+  recipientId String // 接收通知的用户ID
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  actor     User @relation("actor", fields: [actorId], references: [id])
+  recipient User @relation("recipient", fields: [recipientId], references: [id])
+
+  post    Post?    @relation(fields: [postId], references: [id])
+  message Message? @relation(fields: [messageId], references: [id])
+
+  @@index([recipientId])
+  @@index([actorId])
+  @@map("notifications")
+}
+
+model Post {
+  id           String   @id @default(cuid())
+  content      String   @db.Text
+  image        String?  @db.LongText
+  likesCount   Int      @default(0)
+  repostsCount Int      @default(0)
+  repliesCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       String
+  parentId     String? // 用于回复功能
+
+  user     User      @relation(fields: [userId], references: [id])
+  likes    Like[]
+  reposts  Repost[]
+  replies  Post[]    @relation("PostReplies")
+  parent   Post?     @relation("PostReplies", fields: [parentId], references: [id])
+  notifications Notification[]
+
+  @@index([userId])
+  @@index([parentId])
+  @@map("posts")
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+  @@index([postId])
+  @@map("likes")
+}
+
+model Repost {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+  @@index([postId])
+  @@map("reposts")
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("follower", fields: [followerId], references: [id])
+  following User @relation("following", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+  @@map("follows")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  userId    String
+  chatId    String
+
+  user User @relation(fields: [userId], references: [id])
+  chat Chat @relation(fields: [chatId], references: [id])
+  notifications Notification[]
+
+  @@index([chatId])
+  @@index([userId])
+  @@map("messages")
+}
+
+model Chat {
+  id          String    @id @default(cuid())
+  unreadCount Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user1Id     String
+  user2Id     String
+
+  user1    User      @relation("User1Chats", fields: [user1Id], references: [id])
+  user2    User      @relation("User2Chats", fields: [user2Id], references: [id])
+  messages Message[]
+
+  @@unique([user1Id, user2Id])
+  @@index([user2Id])
+  @@map("chats")
+}
