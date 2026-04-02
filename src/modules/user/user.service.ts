@@ -52,4 +52,25 @@ export class UserService {
       },
     };
   }
+
+  async updateUser(id: string, updateData: any) {
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: updateData,
+    });
+    return {
+      success: true,
+      data: {
+        user: this.sanitizeUser(user),
+      },
+    };
+  }
+
+  async deleteUser(id: string) {
+    await this.prisma.user.delete({ where: { id } });
+    return {
+      success: true,
+      message: "用户已删除",
+    };
+  }
 }

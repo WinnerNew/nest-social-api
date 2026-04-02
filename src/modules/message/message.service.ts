@@ -1,4 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from "@nestjs/common";
 import { PrismaService } from "../../common/utils/prisma.service";
 import { CreateMessageDto } from "./dto/create-message.dto";
 
@@ -105,6 +109,67 @@ export class MessageService {
       success: true,
       data: { message },
       message: "发送消息成功",
+    };
+  }
+
+  async getMessageById(id: string, userId: string) {
+    const message = await this.prisma.message.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            handle: true,
+            avatar: true,
+          },
+        },
+        chat: {
+          include: {
+            user1: {
+              select: {
+                id: true,
+                username: true,
+                handle: true,
+                avatar: true,
+              },
+            },
+            user2: {
+              select: {
+                id: true,
+                username: true,
+                handle: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!message) {
+      throw new NotFoundException("消息不存在");
+    }
+    if (message.userId !== userId) {
+      throw new ForbiddenException("无权查看此消息");
+    }
+    return {
+      success: true,
+      data: { message },
+    };
+  }
+
+  async deleteMessage(id: string, userId: string) {
+    const message = await this.prisma.message.findUnique({ where: { id } });
+    if (!message) {
+      throw new NotFoundException("消息不存在");
+    }
+    if (message.userId !== userId) {
+      throw new ForbiddenException("无权删除此消息");
+    }
+    await this.prisma.message.delete({ where: { id } });
+    return {
+      success: true,
+      message: "消息已删除",
     };
   }
 }

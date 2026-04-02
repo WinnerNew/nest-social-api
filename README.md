@@ -83,29 +83,50 @@ http://localhost:3001/api/docs
 
 ## API 端点
 
-### 根路由
-- `GET /` - 获取 API 信息
-
 ### 认证 (Auth)
-- `POST /api/auth/register` - 用户注册
-- `POST /api/auth/login` - 用户登录
-- `GET /api/auth/me` - 获取当前用户信息（需要认证）
+| 方法 | 端点 | 描述 | 认证 |
+|------|------|------|------|
+| POST | /api/auth/register | 用户注册 | 否 |
+| POST | /api/auth/login | 用户登录 | 否 |
+| GET | /api/auth/me | 获取当前用户信息 | 是 |
 
-### 用户 (User)
-- `GET /api/user` - 获取所有用户
-- `GET /api/user/me` - 获取当前用户信息（需要认证）
-- `GET /api/user/:id` - 根据ID获取用户信息
+### 用户 (Users)
+| 方法 | 端点 | 描述 | 认证 |
+|------|------|------|------|
+| GET | /api/users | 获取用户列表 | 否 |
+| GET | /api/users/me | 获取当前用户信息 | 是 |
+| GET | /api/users/:id | 获取指定用户信息 | 否 |
+| PATCH | /api/users/me | 更新当前用户信息 | 是 |
+| DELETE | /api/users/me | 删除当前用户 | 是 |
 
-### 帖子 (Post)
-- `GET /api/post` - 获取所有帖子
-- `POST /api/post` - 创建帖子（需要认证）
+### 帖子 (Posts)
+| 方法 | 端点 | 描述 | 认证 |
+|------|------|------|------|
+| GET | /api/posts | 获取帖子列表 | 否 |
+| GET | /api/posts/:id | 获取指定帖子 | 否 |
+| POST | /api/posts | 创建帖子 | 是 |
+| PATCH | /api/posts/:id | 更新帖子 | 是 |
+| DELETE | /api/posts/:id | 删除帖子 | 是 |
+| POST | /api/posts/:id/like | 点赞帖子 | 是 |
+| DELETE | /api/posts/:id/like | 取消点赞 | 是 |
+| POST | /api/posts/:id/repost | 转发帖子 | 是 |
 
-### 消息 (Message)
-- `GET /api/message` - 获取当前用户的消息（需要认证）
-- `POST /api/message` - 发送消息（需要认证）
+### 消息 (Messages)
+| 方法 | 端点 | 描述 | 认证 |
+|------|------|------|------|
+| GET | /api/messages | 获取消息列表 | 是 |
+| GET | /api/messages/:id | 获取指定消息 | 是 |
+| POST | /api/messages | 发送消息 | 是 |
+| DELETE | /api/messages/:id | 删除消息 | 是 |
 
-### 通知 (Notification)
-- `GET /api/notification` - 获取当前用户的通知（需要认证）
+### 通知 (Notifications)
+| 方法 | 端点 | 描述 | 认证 |
+|------|------|------|------|
+| GET | /api/notifications | 获取通知列表 | 是 |
+| GET | /api/notifications/:id | 获取指定通知 | 是 |
+| PATCH | /api/notifications/:id/read | 标记通知为已读 | 是 |
+| PATCH | /api/notifications/read-all | 标记所有通知为已读 | 是 |
+| DELETE | /api/notifications/:id | 删除通知 | 是 |
 
 ## 数据库模型
 

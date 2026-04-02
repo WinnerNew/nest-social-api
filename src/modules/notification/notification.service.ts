@@ -1,4 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from "@nestjs/common";
 import { PrismaService } from "../../common/utils/prisma.service";
 
 @Injectable()
@@ -55,11 +59,11 @@ export class NotificationService {
     });
 
     if (!notification) {
-      throw new Error("通知不存在");
+      throw new NotFoundException("通知不存在");
     }
 
     if (notification.recipientId !== userId) {
-      throw new Error("无权操作此通知");
+      throw new ForbiddenException("无权操作此通知");
     }
 
     const updatedNotification = await this.prisma.notification.update({
@@ -86,6 +90,55 @@ export class NotificationService {
     return {
       success: true,
       message: "全部标记已读成功",
+    };
+  }
+
+  async getNotificationById(id: string, userId: string) {
+    const notification = await this.prisma.notification.findUnique({
+      where: { id },
+      include: {
+        actor: {
+          select: {
+            id: true,
+            username: true,
+            handle: true,
+            avatar: true,
+          },
+        },
+        post: {
+          select: {
+            id: true,
+            content: true,
+          },
+        },
+      },
+    });
+    if (!notification) {
+      throw new NotFoundException("通知不存在");
+    }
+    if (notification.recipientId !== userId) {
+      throw new ForbiddenException("无权查看此通知");
+    }
+    return {
+      success: true,
+      data: { notification },
+    };
+  }
+
+  async deleteNotification(id: string, userId: string) {
+    const notification = await this.prisma.notification.findUnique({
+      where: { id },
+    });
+    if (!notification) {
+      throw new NotFoundException("通知不存在");
+    }
+    if (notification.recipientId !== userId) {
+      throw new ForbiddenException("无权删除此通知");
+    }
+    await this.prisma.notification.delete({ where: { id } });
+    return {
+      success: true,
+      message: "通知已删除",
     };
   }
 }

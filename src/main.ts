@@ -7,6 +7,9 @@ import "dotenv/config";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // 设置全局前缀
+  app.setGlobalPrefix("api");
+
   // 配置 CORS
   app.enableCors({
     origin: "*",
@@ -16,7 +19,12 @@ async function bootstrap() {
   });
 
   // 配置验证管道
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    })
+  );
 
   // 配置 Swagger
   const config = new DocumentBuilder()
