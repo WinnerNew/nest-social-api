@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../common/utils/prisma.service";
+import { PaginationUtil } from "../../common/utils/pagination.util";
+import { ResponseUtil } from "../../common/utils/response.util";
 
 @Injectable()
 export class UserService {
@@ -16,7 +18,7 @@ export class UserService {
   }
 
   async getUsers(page: number = 1, limit: number = 10) {
-    const skip = (page - 1) * limit;
+    const skip = PaginationUtil.calculateSkip(page, limit);
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
         skip,
@@ -26,18 +28,11 @@ export class UserService {
       this.prisma.user.count(),
     ]);
 
-    return {
-      success: true,
-      data: {
-        users: users.map((user) => this.sanitizeUser(user)),
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      },
-    };
+    const pagination = PaginationUtil.calculatePagination(page, limit, total);
+    return ResponseUtil.success({
+      users: users.map((user) => this.sanitizeUser(user)),
+      pagination,
+    });
   }
 
   async getUserById(id: string) {
@@ -45,12 +40,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException("用户不存在");
     }
-    return {
-      success: true,
-      data: {
-        user: this.sanitizeUser(user),
-      },
-    };
+    return ResponseUtil.success({ user: this.sanitizeUser(user) });
   }
 
   async updateUser(id: string, updateData: any) {
@@ -58,19 +48,11 @@ export class UserService {
       where: { id },
       data: updateData,
     });
-    return {
-      success: true,
-      data: {
-        user: this.sanitizeUser(user),
-      },
-    };
+    return ResponseUtil.success({ user: this.sanitizeUser(user) });
   }
 
   async deleteUser(id: string) {
     await this.prisma.user.delete({ where: { id } });
-    return {
-      success: true,
-      message: "用户已删除",
-    };
+    return ResponseUtil.successWithMessage("用户已删除");
   }
 }

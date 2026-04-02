@@ -5,13 +5,28 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "../../common/utils/prisma.service";
 import { CreatePostDto } from "./dto/create-post.dto";
+import { PaginationUtil } from "../../common/utils/pagination.util";
+import { ResponseUtil } from "../../common/utils/response.util";
 
 @Injectable()
 export class PostService {
   constructor(private prisma: PrismaService) {}
 
+  private transformPost(post: any) {
+    if (post._count) {
+      return {
+        ...post,
+        likesCount: post._count.likes,
+        repostsCount: post._count.reposts,
+        repliesCount: post._count.replies,
+        _count: undefined,
+      };
+    }
+    return post;
+  }
+
   async getPosts(page: number = 1, limit: number = 10) {
-    const skip = (page - 1) * limit;
+    const skip = PaginationUtil.calculateSkip(page, limit);
     const [posts, total] = await Promise.all([
       this.prisma.post.findMany({
         skip,
@@ -38,24 +53,11 @@ export class PostService {
       this.prisma.post.count(),
     ]);
 
-    return {
-      success: true,
-      data: {
-        posts: posts.map((post) => ({
-          ...post,
-          likesCount: post._count.likes,
-          repostsCount: post._count.reposts,
-          repliesCount: post._count.replies,
-          _count: undefined,
-        })),
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      },
-    };
+    const pagination = PaginationUtil.calculatePagination(page, limit, total);
+    return ResponseUtil.success({
+      posts: posts.map((post) => this.transformPost(post)),
+      pagination,
+    });
   }
 
   async createPost(createPostDto: CreatePostDto, userId: string) {
@@ -73,11 +75,7 @@ export class PostService {
         },
       },
     });
-    return {
-      success: true,
-      data: { post },
-      message: "创建帖子成功",
-    };
+    return ResponseUtil.success({ post }, "创建帖子成功");
   }
 
   async getPostById(id: string) {
@@ -104,18 +102,7 @@ export class PostService {
     if (!post) {
       throw new NotFoundException("帖子不存在");
     }
-    return {
-      success: true,
-      data: {
-        post: {
-          ...post,
-          likesCount: post._count.likes,
-          repostsCount: post._count.reposts,
-          repliesCount: post._count.replies,
-          _count: undefined,
-        },
-      },
-    };
+    return ResponseUtil.success({ post: this.transformPost(post) });
   }
 
   async updatePost(id: string, updateData: CreatePostDto, userId: string) {
@@ -140,11 +127,7 @@ export class PostService {
         },
       },
     });
-    return {
-      success: true,
-      data: { post: updatedPost },
-      message: "帖子更新成功",
-    };
+    return ResponseUtil.success({ post: updatedPost }, "帖子更新成功");
   }
 
   async deletePost(id: string, userId: string) {
@@ -156,10 +139,7 @@ export class PostService {
       throw new ForbiddenException("无权删除此帖子");
     }
     await this.prisma.post.delete({ where: { id } });
-    return {
-      success: true,
-      message: "帖子已删除",
-    };
+    return ResponseUtil.successWithMessage("帖子已删除");
   }
 
   async likePost(id: string, userId: string) {
@@ -176,10 +156,7 @@ export class PostService {
     await this.prisma.like.create({
       data: { postId: id, userId },
     });
-    return {
-      success: true,
-      message: "点赞成功",
-    };
+    return ResponseUtil.successWithMessage("点赞成功");
   }
 
   async unlikePost(id: string, userId: string) {
@@ -192,10 +169,7 @@ export class PostService {
     await this.prisma.like.delete({
       where: { userId_postId: { userId, postId: id } },
     });
-    return {
-      success: true,
-      message: "取消点赞成功",
-    };
+    return ResponseUtil.successWithMessage("取消点赞成功");
   }
 
   async repostPost(id: string, userId: string) {
@@ -212,9 +186,6 @@ export class PostService {
     await this.prisma.repost.create({
       data: { postId: id, userId },
     });
-    return {
-      success: true,
-      message: "转发成功",
-    };
+    return ResponseUtil.successWithMessage("转发成功");
   }
 }

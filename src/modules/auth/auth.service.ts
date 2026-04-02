@@ -8,6 +8,7 @@ import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import * as bcrypt from "bcryptjs";
 import { JwtService } from "@nestjs/jwt";
+import { ResponseUtil } from "../../common/utils/response.util";
 
 @Injectable()
 export class AuthService {
@@ -27,9 +28,7 @@ export class AuthService {
     const { username, handle, password, avatar } = registerDto;
 
     const existingUser = await this.prisma.user.findFirst({
-      where: {
-        OR: [{ username }, { handle }],
-      },
+      where: { OR: [{ username }, { handle }] },
     });
     if (existingUser) {
       if (existingUser.username === username) {
@@ -41,29 +40,21 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await this.prisma.user.create({
       data: { username, handle, password: hashedPassword, avatar },
     });
-
     const token = this.jwtService.sign({ userId: user.id });
 
-    return {
-      success: true,
-      data: {
-        user: this.sanitizeUser(user),
-        token,
-      },
-      message: "注册成功",
-    };
+    return ResponseUtil.success(
+      { user: this.sanitizeUser(user), token },
+      "注册成功"
+    );
   }
 
   async login(loginDto: LoginDto) {
     const { handle, password } = loginDto;
 
-    const user = await this.prisma.user.findUnique({
-      where: { handle },
-    });
+    const user = await this.prisma.user.findUnique({ where: { handle } });
     if (!user) {
       throw new UnauthorizedException("用户名或密码错误");
     }
@@ -74,15 +65,10 @@ export class AuthService {
     }
 
     const token = this.jwtService.sign({ userId: user.id });
-
-    return {
-      success: true,
-      data: {
-        user: this.sanitizeUser(user),
-        token,
-      },
-      message: "登录成功",
-    };
+    return ResponseUtil.success(
+      { user: this.sanitizeUser(user), token },
+      "登录成功"
+    );
   }
 
   async getCurrentUser(userId: string) {
@@ -90,12 +76,6 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException("用户不存在");
     }
-
-    return {
-      success: true,
-      data: {
-        user: this.sanitizeUser(user),
-      },
-    };
+    return ResponseUtil.success({ user: this.sanitizeUser(user) });
   }
 }
