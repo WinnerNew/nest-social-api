@@ -41,7 +41,10 @@ export class AuthService {
     });
 
     // 生成 JWT 令牌
-    const token = this.jwtService.sign({ userId: user.id });
+    const token = this.jwtService.sign(
+      { userId: user.id },
+      { expiresIn: "1h" }
+    );
 
     return {
       success: true,
@@ -77,7 +80,10 @@ export class AuthService {
     }
 
     // 生成 JWT 令牌
-    const token = this.jwtService.sign({ userId: user.id });
+    const token = this.jwtService.sign(
+      { userId: user.id },
+      { expiresIn: "1h" }
+    );
 
     return {
       success: true,
