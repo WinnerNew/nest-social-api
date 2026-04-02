@@ -1,4 +1,4 @@
-import * as packageJson from "../../package.json";
+import * as packageJson from "../../../package.json";
 
 /**
  * 版本信息管理

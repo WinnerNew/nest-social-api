@@ -37,7 +37,7 @@ npm install
 
 3. 配置环境变量
 
-在项目根目录创建 `.env` 文件，并添加以下内容：
+项目已包含 `.env` 文件，请根据你的数据库配置修改以下环境变量：
 
 ```env
 DATABASE_URL="mysql://username:password@localhost:3306/database_name"
