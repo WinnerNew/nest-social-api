@@ -230,8 +230,10 @@ src/
 │   │   └── jwt-auth.guard.ts
 │   └── utils/
 │       ├── jwt.strategy.ts
+│       ├── pagination.util.ts
 │       ├── prisma.module.ts
-│       └── prisma.service.ts
+│       ├── prisma.service.ts
+│       └── response.util.ts
 ├── modules/
 │   ├── auth/
 │   │   ├── auth.controller.ts
