@@ -1,15 +1,42 @@
-# 更新日志
+更新日志
+### 0.0.2 (2026-04-02)
 
-本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/) 规范。
 
-## [Unreleased]
+### 新增
 
-### 计划中
-- 添加单元测试
-- 添加集成测试
-- 实现文件上传功能
-- 添加用户关注/取消关注功能
-- 实现实时消息通知
+* 添加 Prisma 数据库模型和配置 ([885cf4a](https://github.com/WinnerNew/nest-social-api/commit/885cf4a79545713c0737069ceeb62516e70a4c9e))
+* 添加认证模块（注册、登录、JWT） ([494f5bc](https://github.com/WinnerNew/nest-social-api/commit/494f5bc64690a480630e111130eec4a7424c68db))
+* 添加帖子模块 ([2fd1fc0](https://github.com/WinnerNew/nest-social-api/commit/2fd1fc013412453bb39276c7a7efc17778460951))
+* 添加通用工具和守卫 ([66eb7fc](https://github.com/WinnerNew/nest-social-api/commit/66eb7fc25a04656c595f4844466640297ad98f08))
+* 添加通知模块 ([fc900d8](https://github.com/WinnerNew/nest-social-api/commit/fc900d850698c6b57a504a9e340a74f6db33a925))
+* 添加消息模块 ([c1759f0](https://github.com/WinnerNew/nest-social-api/commit/c1759f0280924b796bce428179c0652d17f3b4b7))
+* 添加应用入口和主模块 ([838a13e](https://github.com/WinnerNew/nest-social-api/commit/838a13e40465761b5bd87e7b209b803c265affe0))
+* 添加用户模块 ([b1ea24f](https://github.com/WinnerNew/nest-social-api/commit/b1ea24fc59ef995e154f58bf765ba3dd557fea42))
+
+
+### 修复
+
+* 为 JWT 令牌添加过期时间设置 ([15a4ab5](https://github.com/WinnerNew/nest-social-api/commit/15a4ab59cd4ddd7f2afdb43af883bdbbdabe2803))
+
+
+### 构建
+
+* 初始化项目配置 ([ffd0a23](https://github.com/WinnerNew/nest-social-api/commit/ffd0a2307a2b17c2994446b7c78b9a275c2c5ee6))
+* 添加 ESLint 和 NestJS CLI 配置 ([af2318a](https://github.com/WinnerNew/nest-social-api/commit/af2318ac6df63e6c8ed3b31c1e6cf6add9bd6bea))
+* 添加 package-lock.json 文件 ([ea19002](https://github.com/WinnerNew/nest-social-api/commit/ea190027288af15ae576f2de036a87004c91ec06))
+* 添加 TypeScript 配置 ([9fada94](https://github.com/WinnerNew/nest-social-api/commit/9fada940799fd0f4435842b85bc602548fe8a02b))
+
+
+### 重构
+
+* 移除 JWT 过期时间重复配置，使用模块级别统一配置 ([35de2f5](https://github.com/WinnerNew/nest-social-api/commit/35de2f57779e070fc64a6f089d7d0f1cdf774b6c))
+* 优化代码逻辑和性能 ([0b8e898](https://github.com/WinnerNew/nest-social-api/commit/0b8e898f41fe91ab1fcb3347e9a28c7c9b54efeb))
+
+
+### 文档
+
+* 更新 SECURITY.md 中的安全漏洞报告邮箱 ([9f9c967](https://github.com/WinnerNew/nest-social-api/commit/9f9c9679d724398085e75fa064c62b0d24ec73e5))
+* 添加符合 GitHub 规范的版本控制文件 ([357c8e8](https://github.com/WinnerNew/nest-social-api/commit/357c8e8dca049f117271da23b3355ffe72ff235e))
 
 ## [0.0.1] - 2026-04-02
 
