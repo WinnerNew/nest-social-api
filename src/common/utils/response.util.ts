@@ -21,8 +21,8 @@ export class ResponseUtil {
       total: number;
       totalPages: number;
     },
-    message?: string
-  ): ApiResponse<{ items: T[]; pagination: any }> {
+    message?: string,
+  ): ApiResponse<{ items: T[]; pagination: typeof pagination }> {
     return {
       success: true,
       data: {

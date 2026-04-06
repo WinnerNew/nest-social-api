@@ -7,12 +7,22 @@ import { PrismaService } from "../../common/utils/prisma.service";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { PaginationUtil } from "../../common/utils/pagination.util";
 import { ResponseUtil } from "../../common/utils/response.util";
+import { Post, User } from "@prisma/client";
+
+type PostWithUser = Post & {
+  user: Pick<User, "id" | "username" | "handle" | "avatar">;
+  _count?: {
+    likes: number;
+    reposts: number;
+    replies: number;
+  };
+};
 
 @Injectable()
 export class PostService {
   constructor(private prisma: PrismaService) {}
 
-  private transformPost(post: any) {
+  private transformPost(post: PostWithUser) {
     if (post._count) {
       return {
         ...post,

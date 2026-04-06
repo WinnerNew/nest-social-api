@@ -2,12 +2,13 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../common/utils/prisma.service";
 import { PaginationUtil } from "../../common/utils/pagination.util";
 import { ResponseUtil } from "../../common/utils/response.util";
+import { User, Prisma } from "@prisma/client";
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  private sanitizeUser(user: any) {
+  private sanitizeUser(user: User) {
     return {
       id: user.id,
       username: user.username,
@@ -43,7 +44,7 @@ export class UserService {
     return ResponseUtil.success({ user: this.sanitizeUser(user) });
   }
 
-  async updateUser(id: string, updateData: any) {
+  async updateUser(id: string, updateData: Prisma.UserUpdateInput) {
     const user = await this.prisma.user.update({
       where: { id },
       data: updateData,
